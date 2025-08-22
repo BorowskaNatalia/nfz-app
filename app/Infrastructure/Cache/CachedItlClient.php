@@ -20,22 +20,30 @@ final class CachedItlClient implements ItlClient
 
         return Cache::remember($key, $ttl, function () use ($params, $key) {
             Log::info('itl.cache.miss', ['key' => $key]);
+
             return $this->inner->search($params);
         });
     }
 
     private function makeKey(SearchParams $p): string
     {
-        // wersjonuj klucze na wypadek zmian schematu
         $payload = [
-            'v'        => 1,
-            'query'    => $p->query,
+            'v' => 1,
+            'query' => $p->query,
             'province' => $p->province,
             'priority' => $p->priority->value,
-            'kids'     => $p->forChildren, // nawet jeśli nie używa tego ITL, zachowujemy izolację
-            'maxDays'  => $p->maxDays,
+            'kids' => $p->forChildren,
+            'maxDays' => $p->maxDays,
         ];
 
-        return 'itl:' . sha1(json_encode($payload, JSON_UNESCAPED_UNICODE));
+        try {
+            // Gwarantuje string albo wyjątek (bez false) → PHPStan zadowolony
+            $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            // awaryjny fallback – i tak zwróci string
+            $json = serialize($payload);
+        }
+
+        return 'itl:'.sha1($json);
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
 use App\Contracts\ItlClient;
-use App\Domain\Value\{SearchParams, Priority};
+use App\Domain\DTO\AppointmentDTO;
+use App\Domain\DTO\ProviderDTO;
+use App\Domain\DTO\SearchResultDTO;
+use App\Domain\Value\SearchParams;
 use App\Infrastructure\Cache\CachedItlClient;
-use App\Domain\DTO\{ProviderDTO, AppointmentDTO, SearchResultDTO};
 use Illuminate\Support\Carbon;
 
 it('uses cache for identical requests', function () {
@@ -12,7 +14,8 @@ it('uses cache for identical requests', function () {
     config()->set('cache.default', 'array');
     config()->set('itl.cache_ttl', 900);
 
-    $counter = new class implements ItlClient {
+    $counter = new class implements ItlClient
+    {
         public int $calls = 0;
 
         public function search(SearchParams $params): array

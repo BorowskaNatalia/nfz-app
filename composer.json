@@ -14,12 +14,12 @@
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
+        "larastan/larastan": "^2.11",
+        "laravel/pint": "^1.24",
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin": "^2.1",
         "pestphp/pest-plugin-laravel": "^2.4",
-        "laravel/pint": "^1.13",
-        "nunomaduro/larastan": "^2.9",
-        "rector/rector": "^1.0"
+        "rector/rector": "^1.2"
     },
     "autoload": {
         "psr-4": {

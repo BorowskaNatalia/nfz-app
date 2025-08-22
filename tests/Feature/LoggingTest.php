@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Log;
 
 it('writes an info log with request_id', function () {
     $captured = null;

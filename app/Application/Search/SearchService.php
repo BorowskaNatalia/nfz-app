@@ -1,10 +1,10 @@
 <?php
 
-namespace app\Application\Search;
+namespace App\Application\Search;
 
-use app\Contracts\ItlClient;
-use app\Domain\DTO\SearchResultDTO;
-use app\Domain\Value\SearchParams;
+use App\Contracts\ItlClient;
+use App\Domain\DTO\SearchResultDTO;
+use App\Domain\Value\SearchParams;
 use Illuminate\Support\Carbon;
 
 final readonly class SearchService

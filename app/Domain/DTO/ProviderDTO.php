@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Domain\DTO;
+namespace App\Domain\DTO;
 
 final readonly class ProviderDTO
 {

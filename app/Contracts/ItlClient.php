@@ -1,9 +1,9 @@
 <?php
 
-namespace app\Contracts;
+namespace App\Contracts;
 
-use app\Domain\DTO\SearchResultDTO;
-use app\Domain\Value\SearchParams;
+use App\Domain\DTO\SearchResultDTO;
+use App\Domain\Value\SearchParams;
 
 /**
  * Źródło danych o kolejkach (Terminy Leczenia).

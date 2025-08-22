@@ -6,3 +6,8 @@ fix:
 
 rector:
 	docker compose run --rm app vendor/bin/rector process
+
+
+
+
+vendor/bin/phpstan analyse --memory-limit=512M --no-progress --ansi

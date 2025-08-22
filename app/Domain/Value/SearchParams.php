@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Domain\Value;
+namespace App\Domain\Value;
 
 final readonly class SearchParams
 {

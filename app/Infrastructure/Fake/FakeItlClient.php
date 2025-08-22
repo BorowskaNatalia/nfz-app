@@ -1,12 +1,12 @@
 <?php
 
-namespace app\Infrastructure\Fake;
+namespace App\Infrastructure\Fake;
 
-use app\Contracts\ItlClient;
-use app\Domain\DTO\AppointmentDTO;
-use app\Domain\DTO\ProviderDTO;
-use app\Domain\DTO\SearchResultDTO;
-use app\Domain\Value\SearchParams;
+use App\Contracts\ItlClient;
+use App\Domain\DTO\AppointmentDTO;
+use App\Domain\DTO\ProviderDTO;
+use App\Domain\DTO\SearchResultDTO;
+use App\Domain\Value\SearchParams;
 
 final class FakeItlClient implements ItlClient
 {

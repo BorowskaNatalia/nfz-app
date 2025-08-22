@@ -1,8 +1,8 @@
 <?php
 
-namespace app\Domain\DTO;
+namespace App\Domain\DTO;
 
-use app\Domain\Value\Priority;
+use App\Domain\Value\Priority;
 use DateTimeImmutable;
 
 final readonly class AppointmentDTO

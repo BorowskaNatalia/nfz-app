@@ -1,8 +1,8 @@
 <?php
 
-use app\Domain\Value\Priority;
-use app\Domain\Value\SearchParams;
-use app\Infrastructure\Fake\FakeItlClient;
+use App\Domain\Value\Priority;
+use App\Domain\Value\SearchParams;
+use App\Infrastructure\Fake\FakeItlClient;
 
 it('returns a list of SearchResultDTO from FakeItlClient', function () {
     $client = new FakeItlClient;

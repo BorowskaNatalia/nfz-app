@@ -1,9 +1,9 @@
 <?php
 
-use App\Domain\DTO\AppointmentDTO;
-use App\Domain\DTO\ProviderDTO;
-use App\Domain\DTO\SearchResultDTO;
-use App\Domain\Value\Priority;
+use app\Domain\DTO\AppointmentDTO;
+use app\Domain\DTO\ProviderDTO;
+use app\Domain\DTO\SearchResultDTO;
+use app\Domain\Value\Priority;
 
 it('builds SearchResultDTO with correct types', function () {
     $provider = new ProviderDTO(

@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ansi
-                      
+
       - name: Prepare .env for tests
         run: |
           cp .env.example .env
@@ -51,7 +51,7 @@ jobs:
         run: vendor/bin/pint --test
 
       - name: PHPStan (static analysis)
-        run: vendor/bin/phpstan analyse --no-progress --ansi
+        run: php -d memory_limit=512M vendor/bin/phpstan analyse --no-progress --ansi
 
       - name: Tests (Pest)
         run: vendor/bin/pest --ci

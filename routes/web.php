@@ -6,6 +6,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/health', function () {
-    return response('ok', 200);
-});
+Route::get('/health', fn() => response('ok', 200));

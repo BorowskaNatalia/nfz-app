@@ -25,7 +25,13 @@ jobs:
           tools: composer
           coverage: none
           extensions: mbstring, xml, sqlite3, pdo_sqlite, fileinfo, openssl
-
+      
+      - name: Prepare .env for tests
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          cp .env .env.testing
+          
       - name: Cache Composer downloads
         uses: actions/cache@v4
         with:

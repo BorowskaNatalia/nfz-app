@@ -7,7 +7,7 @@ use app\Domain\DTO\SearchResultDTO;
 use app\Domain\Value\SearchParams;
 use Illuminate\Support\Carbon;
 
-final class SearchService
+final readonly class SearchService
 {
     public function __construct(private ItlClient $itl) {}
 

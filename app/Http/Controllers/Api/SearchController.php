@@ -13,6 +13,20 @@ class SearchController
     {
         $items = $service->search($request->toParams(), $request->sort());
 
-        return SearchResultResource::collection($items);
+        $lastUpdated = null;
+        if (! empty($items)) {
+            $lastUpdated = max(array_map(
+                fn ($r) => $r->appointment->lastUpdated->format(DATE_ATOM),
+                $items
+            ));
+        }
+
+        return SearchResultResource::collection($items)
+            ->additional([
+                'meta' => [
+                    'count' => count($items),
+                    'lastUpdated' => $lastUpdated, // null, gdy brak wyników
+                ],
+            ]);
     }
 }

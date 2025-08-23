@@ -16,10 +16,16 @@ it('returns fastest-sorted results with correct shape', function () {
                     'distanceKm',
                 ],
             ],
-        ]);
+            'meta' => ['count', 'lastUpdated'],
+        ])
+        ->assertJsonPath('meta.count', 3);
 
+    // meta.lastUpdated = max z appointment.lastUpdated
     $dates = array_map(fn ($i) => $i['appointment']['firstAvailableDate'], $res->json('data'));
     expect($dates)->toBe(['2025-09-02', '2025-09-05', '2025-09-10']);
+
+    $last = max(array_map(fn ($i) => $i['appointment']['lastUpdated'], $res->json('data')));
+    $res->assertJsonPath('meta.lastUpdated', $last);
 });
 
 it('applies kids and maxDays filters', function () {
@@ -27,6 +33,12 @@ it('applies kids and maxDays filters', function () {
 
     $res = $this->getJson('/api/search?q=kardiolog&province=07&priority=stable&kids=1&maxDays=15');
 
-    $res->assertOk()->assertJsonCount(1, 'data');
+    $res->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('meta.count', 1);
+
     expect($res->json('data.0.provider.name'))->toBe('Przychodnia Alfa');
+
+    $last = max(array_map(fn ($i) => $i['appointment']['lastUpdated'], $res->json('data')));
+    $res->assertJsonPath('meta.lastUpdated', $last);
 });

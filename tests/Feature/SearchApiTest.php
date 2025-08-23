@@ -42,3 +42,22 @@ it('applies kids and maxDays filters', function () {
     $last = max(array_map(fn ($i) => $i['appointment']['lastUpdated'], $res->json('data')));
     $res->assertJsonPath('meta.lastUpdated', $last);
 });
+
+it('soft-relaxes days preset (30 -> 60 -> 90 -> all) and reports it in meta', function () {
+    // 2025-08-01 -> 2025-09-02 = 32 dni, więc 30 dni = pusto, 60 dni = działa
+    Carbon::setTestNow('2025-08-01');
+
+    $res = $this->getJson('/api/search?q=kardiolog&province=07&priority=stable&days=30');
+
+    $res->assertOk()
+        ->assertJsonStructure([
+            'data' => ['*' => ['provider', 'appointment', 'distanceKm']],
+            'meta' => ['count', 'lastUpdated', 'filters' => ['requestedMaxDays', 'appliedMaxDays', 'relaxation']],
+        ])
+        ->assertJsonPath('meta.filters.requestedMaxDays', 30)
+        ->assertJsonPath('meta.filters.appliedMaxDays', 60)
+        ->assertJsonPath('meta.filters.relaxation', ['30', '60']); // wystarczy, że pokażemy, na czym „zaskoczyło”
+
+    // w naszej fake-danych wszystkie 3 mieszczą się w 60 dniach z tej daty
+    $res->assertJsonPath('meta.count', 3);
+});

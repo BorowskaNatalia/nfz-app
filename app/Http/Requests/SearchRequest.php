@@ -25,6 +25,7 @@ class SearchRequest extends FormRequest
             'priority' => ['required', 'in:stable,urgent'],
             'kids' => ['nullable', 'boolean'],
             'maxDays' => ['nullable', 'integer', 'min:1', 'max:365'],
+            'days' => ['nullable', 'in:30,60,90'],
             'sort' => ['nullable', 'in:fastest'],
         ];
     }
@@ -40,6 +41,15 @@ class SearchRequest extends FormRequest
             forChildren: $this->has('kids') ? $this->boolean('kids') : null,
             maxDays: $this->filled('maxDays') ? (int) $this->input('maxDays') : null,
         );
+    }
+
+    public function requestedDays(): ?int
+    {
+        if (! $this->filled('days')) {
+            return null;
+        }
+
+        return (int) $this->input('days');
     }
 
     public function sort(): string

@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         App\Providers\AppServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware) {
+        // CORS tylko dla API
+        $middleware->append(HandleCors::class);
         // globalnie dla wszystkich żądań
         $middleware->append(\App\Http\Middleware\RequestIdMiddleware::class);
     })

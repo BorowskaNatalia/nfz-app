@@ -4,19 +4,28 @@ import type { SearchResponse } from "../types";
 
 export type SearchParams = {
     q: string;
-    province: string;          // np. "07"
+    province: string;
     priority: "stable" | "urgent";
     kids?: boolean;
     days?: 30 | 60 | 90;
     sort?: "fastest";
-    maxDays?: number;          // opcjonalne, raczej nie używamy gdy days
+    maxDays?: number;
 };
+
+function sanitize(obj: Record<string, unknown>) {
+    // wywalamy undefined, null, pusty string
+    return Object.fromEntries(
+        Object.entries(obj).filter(([_, v]) => v !== undefined && v !== null && v !== "")
+    );
+}
 
 export function useSearch(params: SearchParams | null) {
     return useQuery({
         queryKey: ["search", params],
         queryFn: async () => {
-            const res = await api.get<SearchResponse>("/api/search", { params });
+            const res = await api.get<SearchResponse>("/api/search", {
+                params: params ? sanitize(params as Record<string, unknown>) : undefined,
+            });
             return res.data;
         },
         enabled: !!params && !!params.q && !!params.province && !!params.priority,

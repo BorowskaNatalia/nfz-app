@@ -2,58 +2,61 @@
 
 namespace App\Http\Requests;
 
-use App\Domain\Value\Priority;
-use App\Domain\Value\SearchParams;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Domain\Value\{Priority, SearchParams};
 
 class SearchRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        // brak auth w MVP
-        return true;
-    }
-
-    /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<int, \Illuminate\Contracts\Validation\ValidationRule|string>>
-     */
     public function rules(): array
     {
         return [
-            'q' => ['required', 'string', 'min:2'],
+            'q'        => ['required', 'string', 'min:2'],
             'province' => ['required', 'string', 'size:2'],
             'priority' => ['required', 'in:stable,urgent'],
-            'kids' => ['nullable', 'boolean'],
-            'maxDays' => ['nullable', 'integer', 'min:1', 'max:365'],
-            'days' => ['nullable', 'in:30,60,90'],
-            'sort' => ['nullable', 'in:fastest'],
+
+            // 'sometimes' => waliduj tylko jeśli pole przyszło
+            'kids'     => ['sometimes', 'boolean'],
+
+            // przyjmujemy null/puste, gdy nie ustawione
+            'maxDays'  => ['sometimes', 'nullable', 'integer', 'min:1', 'max:365'],
+            'days'     => ['sometimes', 'nullable', 'in:30,60,90'],
+
+            'sort'     => ['sometimes', 'in:fastest'],
         ];
     }
 
-    public function toParams(): SearchParams
+    protected function prepareForValidation(): void
     {
-        $priority = $this->input('priority') === 'urgent' ? Priority::URGENT : Priority::STABLE;
+        // Zamień puste stringi na null
+        $this->merge([
+            'days'    => $this->filled('days') && $this->input('days') !== '' ? $this->input('days') : null,
+            'maxDays' => $this->filled('maxDays') && $this->input('maxDays') !== '' ? $this->input('maxDays') : null,
+        ]);
 
-        return new SearchParams(
-            query: (string) $this->input('q'),
-            province: (string) $this->input('province'),
-            priority: $priority,
-            forChildren: $this->has('kids') ? $this->boolean('kids') : null,
-            maxDays: $this->filled('maxDays') ? (int) $this->input('maxDays') : null,
-        );
-    }
-
-    public function requestedDays(): ?int
-    {
-        if (! $this->filled('days')) {
-            return null;
+        // Upewnij się, że kids jest bool (Laravelowa konwersja)
+        if ($this->has('kids')) {
+            $this->merge(['kids' => $this->boolean('kids')]);
         }
-
-        return (int) $this->input('days');
     }
 
     public function sort(): string
     {
-        return (string) $this->input('sort', 'fastest');
+        return $this->input('sort', 'fastest');
+    }
+
+    public function requestedDays(): ?int
+    {
+        return $this->filled('days') ? (int) $this->input('days') : null;
+    }
+
+    public function toParams(): SearchParams
+    {
+        return new SearchParams(
+            query: $this->string('q'),
+            province: $this->string('province'),
+            priority: $this->input('priority') === 'urgent' ? Priority::URGENT : Priority::STABLE,
+            forChildren: $this->has('kids') ? $this->boolean('kids') : null,
+            maxDays: $this->filled('maxDays') ? (int) $this->input('maxDays') : null,
+        );
     }
 }

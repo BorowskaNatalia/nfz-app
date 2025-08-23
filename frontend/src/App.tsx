@@ -2,20 +2,26 @@ import { useState } from "react";
 import { SearchForm } from "./components/SearchForm";
 import { useSearch, type SearchParams } from "./hooks/useSearch";
 import { ResultCard } from "./components/ResultCard";
-
+import axios from "axios";
 export default function App() {
   const [params, setParams] = useState<SearchParams | null>(null);
   const { data, isLoading, isError, error } = useSearch(params);
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">NFZ Finder — MVP</h1>
+      <h1 className="text-2xl font-bold">NFZ Finder</h1>
 
       <SearchForm onSubmit={(p) => setParams(p)} />
 
       {isLoading && <div className="text-sm">Szukam…</div>}
       {isError && <div className="text-sm text-red-600">Błąd: {(error as Error).message}</div>}
-
+      {isError && (
+        <div className="text-sm text-red-600">
+          {axios.isAxiosError(error) && error.response?.status === 422
+            ? JSON.stringify(error.response.data.errors)
+            : `Błąd: ${(error as Error).message}`}
+        </div>
+      )}
       {data && (
         <>
           <div className="text-sm text-gray-700 flex justify-between">

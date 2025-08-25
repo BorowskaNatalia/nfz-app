@@ -13,6 +13,7 @@ final class BenefitsController extends Controller
     public function __invoke(BenefitsRequest $request, BenefitsService $service): AnonymousResourceCollection
     {
         $items = $service->suggest($request->getQuery(), $request->getLimit());
+
         return BenefitResource::collection($items);
     }
 }

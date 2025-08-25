@@ -2,7 +2,7 @@
 
 namespace App\Domain\DTO;
 
-final class BenefitDTO 
+final class BenefitDTO
 {
     public function __construct(
         public string $name,

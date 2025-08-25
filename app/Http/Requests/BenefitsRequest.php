@@ -14,7 +14,7 @@ class BenefitsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'q'     => ['required', 'string', 'min:2', 'max:80'],
+            'q' => ['required', 'string', 'min:2', 'max:80'],
             'limit' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ];
     }

@@ -23,10 +23,10 @@ final class BenefitsService
                 ->timeout((int) config('itl.timeout', 6))
                 ->retry([200, 500, 1000]) // ms; prosty backoff
                 ->get('/benefits', [
-                    'name'   => $q,
-                    'limit'  => $limit,
+                    'name' => $q,
+                    'limit' => $limit,
                     'format' => 'json',
-                    'page'   => 1,
+                    'page' => 1,
                 ])
                 ->throw();
 
@@ -43,6 +43,7 @@ final class BenefitsService
                     $out[] = new BenefitDTO($name);
                 }
             }
+
             return $out;
         });
     }

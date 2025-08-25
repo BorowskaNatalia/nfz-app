@@ -10,4 +10,6 @@ return [
     ],
     // czas życia cache (sekundy) – domyślnie 15 min
     'cache_ttl' => (int) env('ITL_CACHE_TTL', 900),
+    // czas życia cache słownika świadczeń (sekundy) – domyślnie 24h
+    'dictionary_ttl' => env('ITL_DICT_TTL', 86400),
 ];

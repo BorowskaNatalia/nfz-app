@@ -1,31 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class BenefitsRequest extends FormRequest
+/**
+ * @property-read string $q
+ * @property-read int $limit
+ */
+final class BenefitsRequest extends FormRequest
 {
-    /**
-     * @return array<string, list<string|ValidationRule|Closure>>
-     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /** @return array<string, array<int, string|int>> */
     public function rules(): array
     {
         return [
-            'q' => ['required', 'string', 'min:2', 'max:80'],
+            'q' => ['required', 'string', 'min:2'],
             'limit' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ];
     }
 
     public function getQuery(): string
     {
-        return (string) $this->input('q');
+        return trim((string) $this->validated('q'));
     }
 
     public function getLimit(): int
     {
-        return (int) ($this->input('limit', 10));
+        return (int) ($this->validated('limit') ?? 8);
     }
 }

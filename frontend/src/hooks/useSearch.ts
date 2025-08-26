@@ -23,7 +23,7 @@ export function useSearch(params: SearchParams | null) {
     return useQuery({
         queryKey: ["search", params],
         queryFn: async () => {
-            const res = await api.get<SearchResponse>("/api/search", {
+            const res = await api.get<SearchResponse>("/search", {
                 params: params ? sanitize(params as Record<string, unknown>) : undefined,
             });
             return res.data;

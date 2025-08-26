@@ -5,6 +5,7 @@ namespace App\Application\Dictionary;
 use App\Domain\DTO\BenefitDTO;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 final class BenefitsService
 {
@@ -12,39 +13,64 @@ final class BenefitsService
     public function suggest(string $q, int $limit = 10): array
     {
         $q = trim($q);
+
+        if (mb_strlen($q) < 2) {
+            return [];
+        }
+
         $limit = max(1, min($limit, 50));
 
         $ttl = (int) config('itl.dictionary_ttl', 86400); // 24h
         $key = sprintf('itl:benefits:suggest:%s:%d', mb_strtolower($q), $limit);
 
         return Cache::remember($key, $ttl, function () use ($q, $limit) {
-            $resp = Http::baseUrl((string) config('itl.base_url', 'https://api.nfz.gov.pl/app-itl-api'))
-                ->acceptJson()
-                ->timeout((int) config('itl.timeout', 6))
-                ->retry([200, 500, 1000]) // ms; prosty backoff
-                ->get('/benefits', [
-                    'name' => $q,
-                    'limit' => $limit,
-                    'format' => 'json',
-                    'page' => 1,
-                ])
-                ->throw();
+            try {
+                $resp = Http::baseUrl((string) config('itl.base_url', 'https://api.nfz.gov.pl/app-itl-api'))
+                    ->acceptJson()
+                    ->timeout((int) config('itl.timeout', 6))
+                    ->retry(2, 300) // prosty backoff
+                    ->get('/benefits', [
+                        'name' => $q,        // <— ważne: `name`, nie `q`
+                        'limit' => $limit,
+                        'page' => 1,
+                    ]);
 
-            /** @var array{data?: array<int, array<string, mixed>>} $json */
-            $json = $resp->json();
-            $rows = $json['data'] ?? [];
+                if (! $resp->successful()) {
+                    Log::warning('itl.benefits_http_error', [
+                        'status' => $resp->status(),
+                        'body' => mb_substr($resp->body(), 0, 500),
+                    ]);
 
-            $out = [];
-            foreach ($rows as $row) {
-                // JSON:API -> attributes.benefit (nazwa świadczenia)
-                $attr = $row['attributes'] ?? null;
-                $name = is_array($attr ?? null) ? ($attr['benefit'] ?? null) : null;
-                if (is_string($name) && $name !== '') {
-                    $out[] = new BenefitDTO($name);
+                    return [];
                 }
-            }
 
-            return $out;
+                /** @var array{data?: mixed} $json */
+                $json = $resp->json();
+                $rows = is_array($json['data'] ?? null) ? $json['data'] : [];
+
+                // 3) obsłuż stringi i JSON:API
+                $names = [];
+                foreach ($rows as $row) {
+                    if (is_string($row)) {
+                        $name = trim($row);
+                    } elseif (is_array($row)) {
+                        $attr = $row['attributes'] ?? [];
+                        $name = trim((string) ($attr['benefit'] ?? ($row['name'] ?? '')));
+                    } else {
+                        $name = '';
+                    }
+                    if ($name !== '') {
+                        $names[$name] = true; // 4) dedup
+                    }
+                }
+
+                return array_map(fn (string $n) => new BenefitDTO($n), array_keys($names));
+            } catch (\Throwable $e) {
+                Log::error('itl.benefits_exception', ['msg' => $e->getMessage()]);
+
+                // 2) nie rozlewaj wyjątku do UI
+                return [];
+            }
         });
     }
 }

@@ -8,7 +8,7 @@ use App\Domain\Value\SearchParams;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-final class CachedItlClient implements ItlClient
+final readonly class CachedItlClient implements ItlClient
 {
     public function __construct(private ItlClient $inner) {}
 
@@ -39,7 +39,7 @@ final class CachedItlClient implements ItlClient
         try {
             // Gwarantuje string albo wyjątek (bez false) → PHPStan zadowolony
             $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             // awaryjny fallback – i tak zwróci string
             $json = serialize($payload);
         }

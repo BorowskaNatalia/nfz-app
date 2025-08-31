@@ -21,6 +21,7 @@ final class HttpItlClient implements ItlClient
             'case' => $case,
             'province' => $params->province,
             'benefit' => $params->query,
+            'locality' => $params->city ?: null,
             'page' => 1,
             'limit' => 10,
             'format' => 'json',

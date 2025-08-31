@@ -10,6 +10,7 @@ export type SearchParams = {
     days?: 30 | 60 | 90;
     sort?: "fastest";
     maxDays?: number;
+    city?: string;
 };
 
 function sanitize(obj: Record<string, unknown>) {

@@ -8,3 +8,7 @@ Route::get('/search', SearchController::class);
 use App\Http\Controllers\Api\BenefitsController;
 
 Route::get('/benefits', BenefitsController::class);
+
+use App\Http\Controllers\Api\LocalitiesController;
+
+Route::get('/localities', LocalitiesController::class);

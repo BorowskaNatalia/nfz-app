@@ -34,6 +34,7 @@ final readonly class CachedItlClient implements ItlClient
             'priority' => $p->priority->value,
             'kids' => $p->forChildren,
             'maxDays' => $p->maxDays,
+            'city' => $p->city,
         ];
 
         try {

@@ -1,33 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import type { SearchParams } from "../hooks/useSearch";
+import { api } from "../lib/api";
+import LocalityAutocomplete from "./LocalityAutocomplete";
 
 type Props = {
     onSubmit: (p: SearchParams) => void;
 };
 
 const provinces = [
-    { code: "02", name: "Dolnośląskie" },
-    { code: "04", name: "Kujawsko-Pomorskie" },
-    { code: "06", name: "Lubelskie" },
-    { code: "07", name: "Lubuskie" },
-    { code: "08", name: "Łódzkie" },
-    { code: "10", name: "Małopolskie" },
-    { code: "12", name: "Mazowieckie" },
-    { code: "14", name: "Opolskie" },
-    { code: "16", name: "Podkarpackie" },
-    { code: "18", name: "Podlaskie" },
-    { code: "20", name: "Pomorskie" },
-    { code: "22", name: "Śląskie" },
-    { code: "24", name: "Świętokrzyskie" },
-    { code: "26", name: "Warmińsko-Mazurskie" },
-    { code: "28", name: "Wielkopolskie" },
-    { code: "30", name: "Zachodniopomorskie" },
+    { code: "01", name: "Dolnośląskie" },
+    { code: "02", name: "Kujawsko-Pomorskie" },
+    { code: "03", name: "Lubelskie" },
+    { code: "04", name: "Lubuskie" },
+    { code: "05", name: "Łódzkie" },
+    { code: "06", name: "Małopolskie" },
+    { code: "07", name: "Mazowieckie" },      // <= poprawny kod NFZ
+    { code: "08", name: "Opolskie" },
+    { code: "09", name: "Podkarpackie" },
+    { code: "10", name: "Podlaskie" },
+    { code: "11", name: "Pomorskie" },
+    { code: "12", name: "Śląskie" },
+    { code: "13", name: "Świętokrzyskie" },
+    { code: "14", name: "Warmińsko-Mazurskie" },
+    { code: "15", name: "Wielkopolskie" },
+    { code: "16", name: "Zachodniopomorskie" },
 ];
 
 type BenefitSuggestion = { name: string };
 
 // —————————————————————————————————————————————————————
-// Hook: pobieranie sugestii z debounce + AbortController
+// Hook: pobieranie sugestii przez backend (axios + debounce + AbortController)
 function useBenefitSuggest(query: string, limit = 8) {
     const [items, setItems] = useState<BenefitSuggestion[]>([]);
     const [loading, setLoading] = useState(false);
@@ -48,17 +50,17 @@ function useBenefitSuggest(query: string, limit = 8) {
             try {
                 setLoading(true);
                 setError(null);
-                const url = `/api/benefits?q=${encodeURIComponent(q)}&limit=${limit}`;
-                const res = await fetch(url, { signal: ctrl.signal });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const json = await res.json();
-                const data = Array.isArray(json?.data) ? json.data : [];
+                const res = await api.get("/benefits", {
+                    params: { q, limit },
+                    signal: ctrl.signal as any,
+                });
+                const data = Array.isArray(res.data?.data) ? res.data.data : [];
                 const mapped: BenefitSuggestion[] = data
                     .map((x: any) => ({ name: String(x.name ?? x.attributes?.benefit ?? "") }))
                     .filter((x: BenefitSuggestion) => x.name);
                 if (alive) setItems(mapped);
             } catch (e: any) {
-                if (e?.name === "AbortError") return;
+                if (e?.name === "CanceledError" || e?.code === "ERR_CANCELED") return;
                 if (alive) setError(e?.message ?? "Błąd pobierania");
             } finally {
                 if (alive) setLoading(false);
@@ -149,54 +151,56 @@ function BenefitAutocomplete({
                         }
                         if (e.key === "Escape") setOpen(false);
                     }}
-                    placeholder="np. kardiolog"
+                    placeholder="np. poradnia kardiologiczna"
                 />
-                {open && (value.trim().length >= 2) && (
+                {open && value.trim().length >= 2 && (
                     <div className="absolute z-20 mt-1 w-full bg-white border rounded-lg shadow max-h-64 overflow-auto">
-                        {loading && (
-                            <div className="px-3 py-2 text-sm text-gray-500">Szukam…</div>
-                        )}
-                        {error && (
-                            <div className="px-3 py-2 text-sm text-red-600">Błąd: {error}</div>
-                        )}
+                        {loading && <div className="px-3 py-2 text-sm text-gray-500">Szukam…</div>}
+                        {error && <div className="px-3 py-2 text-sm text-red-600">Błąd: {error}</div>}
                         {!loading && !error && items.length === 0 && (
                             <div className="px-3 py-2 text-sm text-gray-500">Brak podpowiedzi</div>
                         )}
-                        {!loading && !error && items.map((it, i) => (
-                            <button
-                                type="button"
-                                key={`${it.name}-${i}`}
-                                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 ${i === highlight ? "bg-gray-100" : ""
-                                    }`}
-                                onMouseEnter={() => setHighlight(i)}
-                                onMouseDown={(e) => {
-                                    // onMouseDown zamiast onClick - żeby nie stracić focusa przed selekcją
-                                    e.preventDefault();
-                                    select(it.name);
-                                }}
-                            >
-                                {it.name}
-                            </button>
-                        ))}
+                        {!loading && !error &&
+                            items.map((it, i) => (
+                                <button
+                                    type="button"
+                                    key={`${it.name}-${i}`}
+                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 ${i === highlight ? "bg-gray-100" : ""
+                                        }`}
+                                    onMouseEnter={() => setHighlight(i)}
+                                    onMouseDown={(e) => {
+                                        // onMouseDown zamiast onClick - żeby nie stracić focusa przed selekcją
+                                        e.preventDefault();
+                                        select(it.name);
+                                    }}
+                                >
+                                    {it.name}
+                                </button>
+                            ))}
                     </div>
                 )}
             </div>
             <p className="mt-1 text-xs text-gray-500">
-                Wpisz i wybierz z listy -tylko nazwy dostępne w słowniku NFZ.
+                Wpisz i wybierz z listy — tylko nazwy dostępne w słowniku NFZ.
             </p>
         </div>
     );
 }
 
 // —————————————————————————————————————————————————————
-// formularz z integracją BenefitAutocomplete
+// Formularz z BenefitAutocomplete + LocalityAutocomplete
 export function SearchForm({ onSubmit }: Props) {
     const [q, setQ] = useState("Kardiolog"); // domyślnie poprawna nazwa ze słownika
     const [qValid, setQValid] = useState<boolean>(false);
-    const [province, setProvince] = useState("12"); // Mazowieckie
+    const [province, setProvince] = useState("07"); // Mazowieckie (poprawny kod)
     const [priority, setPriority] = useState<"stable" | "urgent">("stable");
     const [kids, setKids] = useState(false);
     const [days, setDays] = useState<30 | 60 | 90 | undefined>(undefined);
+
+    // Miasto przez autocomplete + walidacja „wybrane z listy”
+    const [city, setCity] = useState("");
+    const [cityValid, setCityValid] = useState(false);
+
     const [error, setError] = useState<string | null>(null);
 
     return (
@@ -209,21 +213,32 @@ export function SearchForm({ onSubmit }: Props) {
                     return;
                 }
                 setError(null);
-                onSubmit({ q, province, priority, kids, days, sort: "fastest" });
+                onSubmit({
+                    q,
+                    province,
+                    priority,
+                    kids: kids || undefined,
+                    days,
+                    sort: "fastest",
+                    city: cityValid ? city : undefined, // tylko zatwierdzony wybór
+                });
             }}
         >
-            <BenefitAutocomplete
-                value={q}
-                onChange={setQ}
-                onValidChange={setQValid}
-            />
+            {/* Świadczenie */}
+            <BenefitAutocomplete value={q} onChange={setQ} onValidChange={setQValid} />
 
+            {/* Województwo */}
             <div>
                 <label className="block text-sm font-medium mb-1">Województwo</label>
                 <select
                     className="w-full border rounded-lg px-3 py-2"
                     value={province}
-                    onChange={(e) => setProvince(e.target.value)}
+                    onChange={(e) => {
+                        setProvince(e.target.value);
+                        // zmiana województwa unieważnia wybrane wcześniej miasto
+                        setCity("");
+                        setCityValid(false);
+                    }}
                 >
                     {provinces.map((p) => (
                         <option key={p.code} value={p.code}>
@@ -233,20 +248,29 @@ export function SearchForm({ onSubmit }: Props) {
                 </select>
             </div>
 
+            {/* Miasto (autocomplete NFZ /localities?name=&province=) */}
+            <LocalityAutocomplete
+                province={province}
+                value={city}
+                onChange={setCity}
+                onValidChange={setCityValid}
+                label="Miasto"
+            />
+
+            {/* Priorytet */}
             <div>
                 <label className="block text-sm font-medium mb-1">Priorytet</label>
                 <select
                     className="w-full border rounded-lg px-3 py-2"
                     value={priority}
-                    onChange={(e) =>
-                        setPriority(e.target.value as "stable" | "urgent")
-                    }
+                    onChange={(e) => setPriority(e.target.value as "stable" | "urgent")}
                 >
                     <option value="stable">stabilny</option>
                     <option value="urgent">pilny</option>
                 </select>
             </div>
 
+            {/* Dla dzieci */}
             <div className="flex items-center gap-2">
                 <input
                     id="kids"
@@ -259,6 +283,7 @@ export function SearchForm({ onSubmit }: Props) {
                 </label>
             </div>
 
+            {/* Filtr dni */}
             <div>
                 <label className="block text-sm font-medium mb-1">Filtr dni</label>
                 <select
@@ -275,10 +300,9 @@ export function SearchForm({ onSubmit }: Props) {
                 </select>
             </div>
 
+            {/* Submit + błędy */}
             <div className="md:col-span-6 flex items-center justify-between">
-                {error ? (
-                    <span className="text-sm text-red-600">{error}</span>
-                ) : <span />}
+                {error ? <span className="text-sm text-red-600">{error}</span> : <span />}
                 <button
                     type="submit"
                     className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"

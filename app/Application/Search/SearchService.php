@@ -37,6 +37,14 @@ final readonly class SearchService
             ));
         }
 
+        // filtr: miasto (jeśli podano)
+        if ($params->city) {
+            $items = array_values(array_filter($items, fn ($r) =>
+                /** @var \App\Domain\DTO\SearchResultDTO $r */
+                $this->matchCity($r->provider->address, $params->city)));
+
+        }
+
         // sort: najszybszy termin
         if ($sort === 'fastest') {
             usort(
@@ -46,5 +54,18 @@ final readonly class SearchService
         }
 
         return $items;
+    }
+
+    private function normalize(string $s): string
+    {
+        $s = mb_strtolower(trim($s));
+        $map = ['ą' => 'a', 'ć' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'ó' => 'o', 'ś' => 's', 'ż' => 'z', 'ź' => 'z'];
+
+        return strtr($s, $map);
+    }
+
+    private function matchCity(string $address, string $needle): bool
+    {
+        return str_contains($this->normalize($address), $this->normalize($needle));
     }
 }

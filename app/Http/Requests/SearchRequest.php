@@ -26,6 +26,8 @@ class SearchRequest extends FormRequest
             'days' => ['sometimes', 'nullable', 'in:30,60,90'],
 
             'sort' => ['sometimes', 'in:fastest'],
+
+            'city' => ['sometimes', 'nullable', 'string', 'min:2', 'max:80'],
         ];
     }
 
@@ -35,6 +37,7 @@ class SearchRequest extends FormRequest
         $this->merge([
             'days' => $this->filled('days') && $this->input('days') !== '' ? $this->input('days') : null,
             'maxDays' => $this->filled('maxDays') && $this->input('maxDays') !== '' ? $this->input('maxDays') : null,
+            'city' => $this->filled('city') && trim((string) $this->input('city')) !== '' ? trim((string) $this->input('city')) : null,
         ]);
 
         // Upewnij się, że kids jest bool (Laravelowa konwersja)
@@ -61,6 +64,7 @@ class SearchRequest extends FormRequest
             priority: $this->input('priority') === 'urgent' ? Priority::URGENT : Priority::STABLE,
             forChildren: $this->has('kids') ? $this->boolean('kids') : null,
             maxDays: $this->filled('maxDays') ? (int) $this->input('maxDays') : null,
+            city: $this->filled('city') ? $this->string('city') : null,
         );
     }
 }

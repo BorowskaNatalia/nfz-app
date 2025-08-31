@@ -32,3 +32,15 @@ it('filters by forChildren and maxDays', function () {
     expect($res)->toHaveCount(1);
     expect($res[0]->provider->name)->toBe('Przychodnia Alfa');
 });
+
+it('filters by city name (case/diacritics insensitive)', function () {
+    $service = new SearchService(new FakeItlClient);
+    $params = new SearchParams('kardiolog', '07', Priority::STABLE, city: 'warszawa');
+
+    $res = $service->search($params, 'fastest');
+
+    expect($res)->not->toBeEmpty();
+    foreach ($res as $row) {
+        expect(mb_strtolower($row->provider->address))->toContain('warsz'); // miękko
+    }
+});

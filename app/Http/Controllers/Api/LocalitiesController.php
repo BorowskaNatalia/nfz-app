@@ -34,7 +34,7 @@ final class LocalitiesController extends Controller
 
         return response()->json([
             'meta' => ['count' => count($payload)],
-            'data' => $payload, // => ["WARSZAWA", "WARSZAWA BEMOWO", ...]
+            'data' => $payload,
         ]);
     }
 }

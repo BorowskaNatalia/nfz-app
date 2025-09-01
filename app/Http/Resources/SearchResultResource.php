@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * klasa, która zamienia obiekt  (SearchResultDTO) na stabilny JSON dla API. 
+ * Dzięki temu separuje warstwę domeny od warstwy prezentacji i mam jedno miejsce, w którym kontroluje kształt odpowiedzi.
+ * 
+ * 1. Przyjmuje SearchResultDTO
+ * 2. Mapuje pola z DTO na tablicę (która stanie się JSON-em)
+ * 3. Formatuje typy złożone
+ * 4. Standaryzuje nazewnictwo pod front-end
+*/
 namespace App\Http\Resources;
 
 use App\Domain\DTO\SearchResultDTO;

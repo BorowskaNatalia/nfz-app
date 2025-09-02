@@ -39,10 +39,24 @@ final readonly class SearchService
 
         // filtr: miasto (jeśli podano)
         if ($params->city) {
-            $items = array_values(array_filter($items, fn ($r) =>
-                /** @var \App\Domain\DTO\SearchResultDTO $r */
-                $this->matchCity($r->provider->address, $params->city)));
+            $needle = $this->normalize($params->city);
 
+            $items = array_values(array_filter(
+                $items,
+                function (SearchResultDTO $r) use ($needle): bool {
+                    $prov = $r->provider;
+
+                    // 1) preferujemy dokładne (po normalizacji) dopasowanie locality
+                    if (is_string($prov->locality) && $prov->locality !== '') {
+                        if ($this->normalize($prov->locality) === $needle) {
+                            return true;
+                        }
+                    }
+
+                    // 2) fallback: szukaj w address (np. gdy locality puste)
+                    return $this->matchCity($prov->address, $needle);
+                }
+            ));
         }
 
         // sort: najszybszy termin

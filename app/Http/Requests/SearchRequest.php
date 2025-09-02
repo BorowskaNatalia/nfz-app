@@ -64,7 +64,7 @@ class SearchRequest extends FormRequest
             priority: $this->input('priority') === 'urgent' ? Priority::URGENT : Priority::STABLE,
             forChildren: $this->has('kids') ? $this->boolean('kids') : null,
             maxDays: $this->filled('maxDays') ? (int) $this->input('maxDays') : null,
-            city: $this->filled('city') ? $this->string('city') : null,
+            city: $this->filled('city') ? (string) $this->input('city') : null,
         );
     }
 }

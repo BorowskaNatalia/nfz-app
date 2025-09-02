@@ -37,6 +37,7 @@ class SearchController
                     province: $base->province,
                     priority: $base->priority,
                     forChildren: $base->forChildren,
+                    city: $base->city,
                     maxDays: $candidate,
                 );
 

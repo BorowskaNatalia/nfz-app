@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Ta klasa wysyła zapytania HTTP do ITL API (https://itl-api.ezdrowie.gov.pl/) i zamienia odpowiedź na DTO.
+ * Przyjmuje parametry wyszukiwania w postaci obiektu SearchParams.
+ * Buduje i wysyła zapytanie GET do endpointu /queues.
+ * Parsuje odpowiedź JSON i mapuje każdy element na obiekt SearchResultDTO.
+ */
+
 namespace App\Infrastructure\Http;
 
 use App\Contracts\ItlClient;
@@ -17,15 +24,15 @@ final class HttpItlClient implements ItlClient
     {
         $case = $params->priority === Priority::URGENT ? 2 : 1; // 1=stabilny, 2=pilny
 
-        $query = [
+        $query = array_filter([
             'case' => $case,
             'province' => $params->province,
             'benefit' => $params->query,
-            'locality' => $params->city ?: null,
+            'locality' => $params->city, // OK – korzystasz z pola city
             'page' => 1,
             'limit' => 10,
             'format' => 'json',
-        ];
+        ], static fn ($v) => $v !== null && $v !== '');
 
         $resp = Http::baseUrl((string) config('itl.base_url'))
             ->timeout((int) config('itl.timeout'))
@@ -65,6 +72,7 @@ final class HttpItlClient implements ItlClient
 
         // DTO wymaga string → dajemy pusty string, gdy brak
         $address = is_string($attr['address'] ?? null) ? $attr['address'] : '';
+        $locality = is_string($attr['locality'] ?? null) ? trim($attr['locality']) : '';
 
         // DTO pozwala na null dla telefonu/website
         $phone = is_string($attr['phone'] ?? null) ? $attr['phone'] : null;
@@ -84,6 +92,7 @@ final class HttpItlClient implements ItlClient
             id: $providerId,
             name: $providerName,
             address: $address,
+            locality: $locality,
             phone: $phone,
             website: $website,
             lat: $lat,

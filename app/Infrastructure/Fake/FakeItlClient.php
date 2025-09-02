@@ -13,11 +13,11 @@ final class FakeItlClient implements ItlClient
     /** @return array<SearchResultDTO> */
     public function search(SearchParams $params): array
     {
-        // Udawane dane – 3 rekordy. Ignorujemy parametry na razie (OK na tym etapie).
         $p1 = new ProviderDTO(
             id: 'umw-100',
             name: 'Przychodnia Alfa',
             address: 'Warszawa, ul. Zdrowa 1',
+            locality: 'Warszawa',
             phone: '+48 111 111 111',
             website: null,
             lat: 52.2297,
@@ -36,6 +36,7 @@ final class FakeItlClient implements ItlClient
             id: 'umw-200',
             name: 'Centrum Beta',
             address: 'Warszawa, ul. Szybka 2',
+            locality: 'Warszawa',
             phone: '+48 222 222 222',
             website: 'https://beta.example',
             lat: 52.24,
@@ -56,6 +57,7 @@ final class FakeItlClient implements ItlClient
             address: 'Warszawa, ul. Spokojna 3',
             phone: null,
             website: null,
+            locality: 'Warszawa',
             lat: 52.20,
             lng: 21.03,
             forChildren: true,

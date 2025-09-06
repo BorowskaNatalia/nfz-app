@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Serwis służący do podpowiedzi miejscowości (localities).
+ * (endpoint /localities) i keszuje wynik, żeby nie męczyć API przy każdym wpisanym znaku.
+ */
 declare(strict_types=1);
 
 namespace App\Application\Dictionary;

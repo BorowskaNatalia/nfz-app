@@ -1,7 +1,10 @@
 <?php
-
-declare(strict_types=1);
-
+/*
+Routing → FormRequest (authorize + rules, ewentualnie trim) → [walidacja OK?] → Controller (woła serwis, zwraca JSON).
+ klasa wejścia. Odpowiada za autoryzację i walidację danych z HTTP (query/body),
+ ich oczyszczenie i wygodne gettery (getQuery(), getLimit()). 
+ Jeśli walidacja nie przejdzie, kontroler się w ogóle nie wykona.
+*/
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;

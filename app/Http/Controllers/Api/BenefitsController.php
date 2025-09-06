@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Kontroler obsługujący endpoint /benefits do podpowiedzi świadczeń (benefits).
+ * Używa BenefitsService do pobierania i keszowania wyników.
+ * - odbiera żądanie z walidacją przez BenefitsRequest, woła BenefitsService->suggest(...) 
+ * - zwraca wyniki jako JSON przez BenefitResource::collection(...).
+ *   przekazuje parametry do serwisu i opakowuje odpowiedź.
+ */
 namespace App\Http\Controllers\Api;
 
 use App\Application\Dictionary\BenefitsService;

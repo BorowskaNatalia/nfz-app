@@ -1,5 +1,11 @@
 <?php
-
+/*
+    * Kontroler obsługujący endpoint /localities do podpowiedzi miejscowości (localities).
+    * Używa LocalitiesService do pobierania i keszowania wyników.
+    * - odbiera żądanie z walidacją, woła LocalitiesService->suggest(...) 
+    * - zwraca wyniki jako JSON.
+    *   przekazuje parametry do serwisu i opakowuje odpowiedź.
+    */
 namespace App\Http\Controllers\Api;
 
 use App\Application\Dictionary\LocalitiesService;

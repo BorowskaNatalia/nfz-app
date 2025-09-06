@@ -1,5 +1,10 @@
 <?php
+/**
+ * Serwis służący do wyszukiwania świadczeniodawców i terminów.
+ * Używa ItlClient (który robi właściwe zapytania do API) i dodatkowo filtruje/sortuje wyniki.
+ * bierze wyniki z NFZ (ItlClient), odfiltrowuje je wg ustawień (dla dzieci, max dni, miasto) i sortuje po najbliższym terminie - zwraca gotową listę do API.
 
+ */
 namespace App\Application\Search;
 
 use App\Contracts\ItlClient;

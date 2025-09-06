@@ -1,4 +1,8 @@
 <?php
+/**
+ * Serwis służący do podpowiedzi świadczeń (benefits).
+ * (endpoint /benefits) i keszuje wynik, żeby nie męczyć API przy każdym wpisanym znaku.
+ */
 
 namespace App\Application\Dictionary;
 
@@ -30,7 +34,7 @@ final class BenefitsService
                     ->timeout((int) config('itl.timeout', 6))
                     ->retry(2, 300) // prosty backoff
                     ->get('/benefits', [
-                        'name' => $q,        // <— ważne: `name`, nie `q`
+                        'name' => $q,
                         'limit' => $limit,
                         'page' => 1,
                     ]);
@@ -60,15 +64,13 @@ final class BenefitsService
                         $name = '';
                     }
                     if ($name !== '') {
-                        $names[$name] = true; // 4) dedup
+                        $names[$name] = true;
                     }
                 }
 
                 return array_map(fn (string $n) => new BenefitDTO($n), array_keys($names));
             } catch (\Throwable $e) {
                 Log::error('itl.benefits_exception', ['msg' => $e->getMessage()]);
-
-                // 2) nie rozlewaj wyjątku do UI
                 return [];
             }
         });

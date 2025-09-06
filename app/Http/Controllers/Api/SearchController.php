@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Kontroler obsługujący endpoint /search do wyszukiwania świadczeniodawców i terminów.
+ * Używa SearchService do właściwego wyszukiwania.
+ * - odbiera żądanie z walidacją przez SearchRequest, woła SearchService->search(...) 
+ * - zwraca wyniki jako JSON przez SearchResultResource::collection(...).
+ *   przekazuje parametry do serwisu i opakowuje odpowiedź.
+ */
 namespace App\Http\Controllers\Api;
 
 use App\Application\Search\SearchService;
